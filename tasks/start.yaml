@@ -1,9 +1,4 @@
 ---
-- name: Start docker
-  service:
-    name: docker
-    state: started
-
 # ansible module does not support removal of anon volumes at restart
 # so we do a stop/start
 #

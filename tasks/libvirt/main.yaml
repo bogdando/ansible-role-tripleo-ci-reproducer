@@ -12,7 +12,6 @@
     name: "{{ ansible_user }}"
     groups:
       - libvirt
-      - wheel
     append: true
 - name: reset ssh connection to allow user changes to affect
   meta: reset_connection
@@ -54,7 +53,8 @@
         set -e
         PATH=$PATH:$HOME/.local/bin
         ANSIBLE_STDOUT_CALLBACK=debug
-        ansible-playbook -i {{ install_path }}/hosts -vv \
+        ansible-playbook -i {{ install_path }}/hosts -v \
+          -e ansible_python_interpreter=/usr/bin/python \
           {{ role_path }}/tasks/libvirt/prepare.yaml
     - name: Create libvirt snapshot
       when: create_snapshot
