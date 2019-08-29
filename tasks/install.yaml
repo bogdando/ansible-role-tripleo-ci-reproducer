@@ -6,12 +6,6 @@
   with_items:
     - playbooks
     - projects
-    - httpd.conf
-
-- name: Generate docker compose config
-  template:
-    src: docker-compose.yaml.j2
-    dest: "{{ install_path }}/docker-compose.yaml"
 
 - name: Create directories
   file:
@@ -20,7 +14,17 @@
   with_items:
     - etc_nodepool
     - etc_zuul
-    - zuul
+    - httpd
+
+- name: Generate httpd config
+  copy:
+    src: httpd.conf
+    dest: "{{ install_path }}/httpd"
+
+- name: Generate docker compose config
+  template:
+    src: docker-compose.yaml.j2
+    dest: "{{ install_path }}/docker-compose.yaml"
 
 - name: Create log directory
   become: true

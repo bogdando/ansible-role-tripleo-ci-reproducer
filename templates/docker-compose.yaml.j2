@@ -20,8 +20,8 @@ services:
     depends_on:
       - gerrit
     volumes:
-      - "./playbooks/:/usr/src/:z"
-      - "./projects/:/var/projects/:z"
+      - "playbooks:/usr/src/"
+      - "projects:/var/projects/"
     env_file: secrets.env
     command: |
       /bin/sh -c '\
@@ -56,10 +56,10 @@ services:
             zuul-scheduler -d'
     image: "{{ zuul_scheduler_image }}"
     volumes:
-      - "./etc_zuul/:/etc/zuul/:z"
-      - "./playbooks/:/usr/src/:z"
-      - /var/lib/zuul
-      - "./projects:/var/projects/:z"
+      - "etc_zuul:/etc/zuul/"
+      - "playbooks:/usr/src/"
+      - zuul:/var/lib/zuul
+      - "projects:/var/projects/"
     env_file: secrets.env
   web:
     command: |
@@ -74,8 +74,8 @@ services:
       - "9000:9000"
     image: "{{ zuul_web_image }}"
     volumes:
-      - "./etc_zuul/:/etc/zuul/:z"
-      - "./playbooks/:/usr/src/:z"
+      - "etc_zuul:/etc/zuul/"
+      - "playbooks:/usr/src/"
   executor:
     privileged: true
     environment:
@@ -89,10 +89,11 @@ services:
       net.ipv4.tcp_keepalive_intvl: 75
       net.ipv4.tcp_keepalive_probes: 9
     volumes:
-      - "./etc_zuul/:/etc/zuul/:z"
-      - "./playbooks/:/usr/src/:z"
-      - "{{ logs_path }}:/srv/static/logs:z"
-      - "./projects:/projects/:z"
+      - "etc_zuul:/etc/zuul/"
+      - "playbooks:/usr/src/"
+      - "logs:/srv/static/logs"
+      - "projects:/projects"
+      - reproduce:/root
     env_file: secrets.env
 
   fingergw:
@@ -103,8 +104,8 @@ services:
       - executor
     image: "{{ zuul_fingergw_image }}"
     volumes:
-      - "./etc_zuul/:/etc/zuul/:z"
-      - /var/lib/zuul
+      - "etc_zuul:/etc/zuul/"
+      - zuul:/var/lib/zuul
     ports:
       - "79:79"
 
@@ -115,21 +116,23 @@ services:
       - zk
     image: "{{ nodepool_launcher_image }}"
     volumes:
-      - "./etc_nodepool/:/etc/nodepool/:z"
-      - "~/.config/openstack/:/etc/openstack/:z"
-      - "./etc/pki/:/etc/pki/:z"
+      - "etc_nodepool:/etc/nodepool/"
+      - "config:/etc/openstack/"
+      - "pki:/etc/pki/"
     ports:
       - "8022:8022"
       - "8005:8005"
     environment:
       - REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
+
   logs:
     image: "{{ logs_image }}"
+    command: "sh -c 'cp -f /var/tmp/httpd/httpd.conf /usr/local/apache2/conf/; httpd -DFOREGROUND'"
     ports:
       - "8000:80"
     volumes:
-      - "{{ logs_path }}:/usr/local/apache2/htdocs:z"
-      - "./httpd.conf:/usr/local/apache2/conf/httpd.conf:z"
+      - "logs:/usr/local/apache2/htdocs"
+      - "httpd:/var/tmp/httpd"
 
 {% for i in range(mergers) %}
   merger{{ i }}:
@@ -148,8 +151,30 @@ services:
     image: "{{ zuul_merger_image }}"
     env_file: secrets.env
     volumes:
-      - "./etc_zuul/:/etc/zuul/:z"
-      - "{{ logs_path }}:/srv/static/logs:z"
-      - "./playbooks:/usr/src:z"
+      - "etc_zuul:/etc/zuul/"
+      - "logs:/srv/static/logs"
+      - "playbooks:/usr/src"
 
 {% endfor %}
+
+volumes:
+  config:
+    external: true
+  etc_nodepool:
+    external: true
+  etc_zuul:
+    external: true
+  httpd:
+    external: true
+  logs:
+    external: true
+  pki:
+    external: true
+  playbooks:
+    external: true
+  projects:
+    external: true
+  zuul:
+    external: true
+  reproduce:
+    external: true
