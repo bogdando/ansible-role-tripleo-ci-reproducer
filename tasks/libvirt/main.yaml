@@ -53,8 +53,7 @@
         set -e
         PATH=$PATH:$HOME/.local/bin
         ANSIBLE_STDOUT_CALLBACK=debug
-        ansible-playbook -i {{ install_path }}/hosts -v \
-          -e ansible_python_interpreter=/usr/bin/python \
+        ansible-playbook -i {{ install_path }}/hosts -vv \
           {{ role_path }}/tasks/libvirt/prepare.yaml
     - name: Create libvirt snapshot
       when: create_snapshot
