@@ -93,6 +93,7 @@ services:
       - "playbooks:/usr/src/"
       - "logs:/srv/static/logs"
       - "projects:/projects"
+      - reproduce:/root
     env_file: secrets.env
 
   fingergw:
@@ -174,4 +175,6 @@ volumes:
   projects:
     external: true
   zuul:
+    external: true
+  reproduce:
     external: true
