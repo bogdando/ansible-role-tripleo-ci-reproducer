@@ -23,6 +23,27 @@
   include_role:
     name: snapshot-libvirt
 
+- name: Update zuul inventory
+  when: restore_snapshot|bool
+  vars:
+    libvirt_nodepool: true
+    local_working_dir: "{{ install_path }}/etc_zuul"
+    working_dir: "{{ install_path }}"
+    non_root_user: "{{ ansible_user }}"
+    non_root_group: "{{ ansible_user }}"
+    libvirt_wait_delay: 20
+    libvirt_wait_retries: 3
+    ansible_become: true
+  block:
+    - include_role:
+        name: libvirt/setup/overcloud
+        tasks_from: eval_subnode_ips
+      with_items: "{{ overcloud_nodes }}"
+
+    - import_role:
+        name: libvirt/setup/overcloud
+        tasks_from: zuul_multinode_inventory
+
 - name: Setup libvirt nodes
   when: not restore_snapshot
   vars:
