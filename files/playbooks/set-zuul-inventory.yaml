@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Define inventory_file fact for future zuul builds
+      set_fact:
+        inventory_file: /etc/zuul/zuul-hosts.yaml
+        cacheable: true
