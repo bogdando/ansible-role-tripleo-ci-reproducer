@@ -30,6 +30,7 @@ providers:
         config-drive: true
         image-name: {{ os_centos8_image }}
         username: zuul
+        python-path: auto
     pools:
       - name: main
         max-servers: 5

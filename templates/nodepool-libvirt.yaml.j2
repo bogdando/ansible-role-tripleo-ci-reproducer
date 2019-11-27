@@ -22,6 +22,9 @@ providers:
                 - rhel-8
                 - centos-8
             host-key: "{{ lookup('pipe', 'ssh-keyscan -t ed25519 ' + hostvars[subnode].ansible_host ).split(" ", 1)[1] }}"
+            {% if ansible_python_interpreter is defined -%}
+            python-path: "{{ ansible_python_interpreter }}"
+            {% endif -%}
             username: zuul
             python-path: auto
 {% endfor %}
