@@ -1,7 +1,7 @@
 ---
 - name: Complete zuul-config from RDO config
   git:
-    repo: 'https://github.com/rdo-infra/review.rdoproject.org-config.git'
+    repo: 'https://github.com/bogdando/review.rdoproject.org-config.git'
     dest: rdo_config_repo
     update: false
     version: master
