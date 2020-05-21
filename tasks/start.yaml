@@ -1,4 +1,44 @@
 ---
+- when: container_mode == 'docker'
+  block:
+    - name: Start docker
+      service:
+        name: docker
+        state: started
+      when: not chrooted|default(False)|bool
+
+    # ansible module does not support removal of anon volumes at restart
+    # so we do a stop/start
+    #
+    - name: Stop up zuul and friends
+      docker_service:
+        project_src: "{{ install_path }}"
+        state: absent
+        remove_volumes: true
+    - name: Start up zuul and friends
+      docker_service:
+        project_src: "{{ install_path }}"
+        state: present
+        pull: "{{ pull | default(false) | bool }}"
+
+- when: container_mode == 'podman'
+  block:
+    - name: Stop up zuul and friends with podman
+      become: true
+      command: "{{ install_path }}/tripleo-ci-reproducer.sh --stop"
+      ignore_errors: true
+
+    - name: Pull all images for podman
+      become: true
+      command: "{{ install_path }}/tripleo-ci-reproducer.sh --pull"
+      register: result
+      until: result is success
+      retries: 5
+      delay: 10
+
+    - name: Start podman pod
+      become: true
+      command: "{{ install_path }}/tripleo-ci-reproducer.sh --run"
 
 - name: Wait for zuul tenant
   block:
